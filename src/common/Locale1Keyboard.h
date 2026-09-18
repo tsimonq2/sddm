@@ -1,5 +1,5 @@
 /***************************************************************************
-* Copyright (c) 2021 Pier Luigi Fiorini <pierluigi.fiorini@gmail.com>
+* Copyright (c) 2026 Simon Quigley
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -17,45 +17,39 @@
 * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ***************************************************************************/
 
-#ifndef WAYLANDKEYBOARDBACKEND_H
-#define WAYLANDKEYBOARDBACKEND_H
+#ifndef SDDM_LOCALE1KEYBOARD_H
+#define SDDM_LOCALE1KEYBOARD_H
 
-#include "KeyboardBackend.h"
-#include "Locale1Keyboard.h"
-
-#include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QVariantMap>
 
 namespace SDDM {
 
-class KeyboardModel;
-
-class WaylandKeyboardBackend : public QObject, public KeyboardBackend
-{
-    Q_OBJECT
-public:
-    WaylandKeyboardBackend(KeyboardModelPrivate *kmp);
-    virtual ~WaylandKeyboardBackend();
-
-    void init() override;
-    void disconnect() override;
-    void sendChanges() override;
-    void dispatchEvents() override;
-
-    void connectEventsDispatcher(KeyboardModel *model) override;
-
-private slots:
-    void propertiesChanged(const QString &interface, const QVariantMap &changed, const QStringList &invalidated);
-
-private:
-    void applyLocale1(const Locale1Keyboard &kb);
-    bool readLocale1();
-
-    KeyboardModel *m_model { nullptr };
+struct Locale1Keyboard {
+    QStringList layouts;
+    QStringList variants;
+    QString model;
+    QString options;
 };
 
-} // namespace SDDM
+inline QStringList splitLocale1List(const QString &value)
+{
+    if (value.trimmed().isEmpty())
+        return {};
+    return value.split(QLatin1Char(','), Qt::SkipEmptyParts);
+}
 
-#endif // WAYLANDKEYBOARDBACKEND_H
+inline Locale1Keyboard parseLocale1Keyboard(const QVariantMap &properties)
+{
+    Locale1Keyboard kb;
+    kb.layouts = splitLocale1List(properties.value(QStringLiteral("X11Layout")).toString());
+    kb.variants = splitLocale1List(properties.value(QStringLiteral("X11Variant")).toString());
+    kb.model = properties.value(QStringLiteral("X11Model")).toString();
+    kb.options = properties.value(QStringLiteral("X11Options")).toString();
+    return kb;
+}
+
+}
+
+#endif
