@@ -242,7 +242,8 @@ The `UserAuthFile=` option was removed, the file is always created as
 
 `SessionType=`
 	Session type to use for autologin when the session name exists in both
-	X11 and Wayland session directories.
+	X11 and Wayland session directories, and for the greeter session combo
+	when Last.Session is empty.
 	Valid values are:
 
 	* `wayland`: Prefer a Wayland session.
